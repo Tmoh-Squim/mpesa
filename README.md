@@ -58,7 +58,7 @@ To run the webscrapper
 
 1. Clone the repo
    ```sh
-   git clone https://github.com/wamaithanyamu/Lipa-na-Mpesa-STK-Push-.git
+   git clone https://github.com/Tmoh-Squim/mpesa.git
    ```
 2. Install NPM packages
    ```sh
@@ -86,7 +86,7 @@ To run the webscrapper
 
 
 
-See the [open issues](https://github.com/wamaithanyamu/Lipa-na-Mpesa-STK-Push-/issues) for a full list of proposed features (and known issues).
+
 
 
 
@@ -115,9 +115,9 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 
 <!-- CONTACT -->
 ## Contact
-Tweet me at- [@wamaithanyamu](https://twitter.com/wamaithanyamu) or shoot me an email at hello@wamaithanyamu.com
 
-Project Link: [https://github.com/wamaithanyamu/Lipa-na-Mpesa-STK-Push-](https://github.com/wamaithanyamu/Lipa-na-Mpesa-STK-Push-)
+
+Project Link: [https://github.com/Tmoh-Squim/mpesa.git](https://github.com/Tmoh-Squim/mpesa.git)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
