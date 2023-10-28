@@ -14,7 +14,7 @@ import lipaNaMpesaRoutes from "./routes/routes.lipanampesa.js"
 app.use('/api',lipaNaMpesaRoutes)
 app.get("/",(req,res)=>{
 res.send({
-    message:"Server run nicely! ready 4 stk push request"
+    message:"Server run nicely! ready for stk push request"
 })
 })
 const port = process.env.PORT
