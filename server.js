@@ -12,8 +12,10 @@ app.use(cors())
 // import routes
 import lipaNaMpesaRoutes from "./routes/routes.lipanampesa.js"
 app.use('/api',lipaNaMpesaRoutes)
-app.get("/",(res,req)=>{
-    res.send("server run nicely for stk request")
+app.get("/",(req,res)=>{
+res.send({
+    message:"Server run nicely! ready for stk push request"
+})
 })
 const port = process.env.PORT
 app.listen(port, () => {
