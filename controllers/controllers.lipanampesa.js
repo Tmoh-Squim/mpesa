@@ -6,6 +6,7 @@ import ngrok from 'ngrok'
 // @desc initiate stk push
 // @method POST
 // @route /stkPush
+//updat
 // @access public
 async function createNgrokTunnels(numTunnels) {
   const tunnelUrls = [];
