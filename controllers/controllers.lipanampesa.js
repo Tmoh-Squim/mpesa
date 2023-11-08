@@ -6,20 +6,7 @@ import ngrok from 'ngrok'
 // @desc initiate stk push
 // @method POST
 // @route /stkPush
-//updat
 // @access public
-async function createNgrokTunnels(numTunnels) {
-  const tunnelUrls = [];
-  const api = ngrok.getApi();
-
-  for (let i = 0; i < numTunnels; i++) {
-    const tunnelUrl = await ngrok.connect(3002); // Replace 3002 with the desired port
-    tunnelUrls.push(tunnelUrl);
-  }
-
-  return tunnelUrls;
-}
-
 export const initiateSTKPush = async(req, res) => {
     try{
 
@@ -30,13 +17,14 @@ export const initiateSTKPush = async(req, res) => {
         const timestamp = getTimestamp()
         //shortcode + passkey + timestamp
         const password = new Buffer.from(process.env.BUSINESS_SHORT_CODE + process.env.PASS_KEY + timestamp).toString('base64')
-        // Create multiple ngrok tunnels
-    const numTunnels = 2; // Adjust the number of tunnels as needed
-    const tunnelUrls = await createNgrokTunnels(numTunnels);
+        // create callback url
+        const callback_url = await ngrok.connect(3002);
+        const api = ngrok.getApi();
+        await api.listTunnels();
         const equityAccNum='0660182944658'
 
 
-        console.log("callback ",tunnelUrls)
+        console.log("callback ",callback_url)
         request(
             {
                 url: url,
@@ -53,7 +41,7 @@ export const initiateSTKPush = async(req, res) => {
                     "PartyA": phone,
                     "PartyB": process.env.BUSINESS_SHORT_CODE,
                     "PhoneNumber": phone,
-                    "CallBackURL": `${tunnelUrls[0]}/api/stkPushCallback/${Order_ID}`,
+                    "CallBackURL": `${callback_url}/api/stkPushCallback/${Order_ID}`,
                     "AccountReference": equityAccNum,
                     "TransactionDesc": "Paid online",
                 }
