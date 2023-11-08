@@ -17,8 +17,6 @@ async function createNgrokTunnels(numTunnels) {
     tunnelUrls.push(tunnelUrl);
   }
 
-  const tunnels = await api.listTunnels();
-
   return tunnelUrls;
 }
 
@@ -33,7 +31,7 @@ export const initiateSTKPush = async(req, res) => {
         //shortcode + passkey + timestamp
         const password = new Buffer.from(process.env.BUSINESS_SHORT_CODE + process.env.PASS_KEY + timestamp).toString('base64')
         // Create multiple ngrok tunnels
-    const numTunnels = 1000; // Adjust the number of tunnels as needed
+    const numTunnels = 2; // Adjust the number of tunnels as needed
     const tunnelUrls = await createNgrokTunnels(numTunnels);
         const equityAccNum='0660182944658'
 
