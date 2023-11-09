@@ -9,7 +9,7 @@ import ngrok from 'ngrok'
 //updated
 export const initiateSTKPush = async(req, res) => {
     try{
-
+        console.log("Request body",req.body)
         const {amount, phone,Order_ID} = req.body
         const url = "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest"
         const auth = "Bearer " + req.safaricom_access_token
