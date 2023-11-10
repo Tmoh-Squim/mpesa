@@ -21,7 +21,7 @@ export const initiateSTKPush = async(req, res) => {
         const callback_url = await ngrok.connect(3002);
         const api = ngrok.getApi();
         await api.listTunnels();
-        const equityAccNum='0660182944658'
+        const equityAccNum="squim's e-commerce shop"
 
 
         console.log("callback ",callback_url)
