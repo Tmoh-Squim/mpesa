@@ -132,9 +132,8 @@ export const stkPushCallback = async(req, res) => {
 // @route /confirmPayment/:CheckoutRequestID
 // @access public
 export const confirmPayment = async(req, res) => {
+    console.log('Confirm Payment Function Called');
     try{
-
-
         const url = "https://sandbox.safaricom.co.ke/mpesa/stkpushquery/v1/query"
         const auth = "Bearer " + req.safaricom_access_token
 
