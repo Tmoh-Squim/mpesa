@@ -5,6 +5,7 @@ import ngrok from 'ngrok'
 
 // @desc initiate stk push
 // @method POST
+//updated 
 // @route /stkPush
 export const initiateSTKPush = async(req, res) => {
     try{
