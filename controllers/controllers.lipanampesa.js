@@ -5,6 +5,7 @@ import ngrok from 'ngrok';
 import axios from "axios"
 // @desc initiate stk push
 // @method POST
+//completed
 // @route /stkPush
 export const initiateSTKPush = async (req, res) => {
     try {
