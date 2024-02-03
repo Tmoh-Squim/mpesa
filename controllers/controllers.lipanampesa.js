@@ -1,84 +1,83 @@
 import request from "request";
-import 'dotenv/config'
-import {getTimestamp} from "../Utils/utils.timestamp.js";
-import ngrok from 'ngrok'
-
+import 'dotenv/config';
+import { getTimestamp } from "../Utils/utils.timestamp.js";
+import ngrok from 'ngrok';
+import axios from "axios"
 // @desc initiate stk push
 // @method POST
 // @route /stkPush
-export const initiateSTKPush = async(req, res) => {
-    try{
-        console.log("Request body",req.body)
-        const {amount, phone,Order_ID} = req.body
-        const url = "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest"
-        const auth = "Bearer " + req.safaricom_access_token
+export const initiateSTKPush = async (req, res) => {
+    try {
+        console.log("Request body", req.body);
+        const { amount, phone, Order_ID } = req.body;
+        const url = "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest";
+        const auth = "Bearer " + req.safaricom_access_token;
+        const timestamp = getTimestamp();
+        const password = new Buffer.from(process.env.BUSINESS_SHORT_CODE + process.env.PASS_KEY + timestamp).toString('base64');
+        let callback_url;
 
-        const timestamp = getTimestamp()
-        //shortcode + passkey + timestamp
-        const password = new Buffer.from(process.env.BUSINESS_SHORT_CODE + process.env.PASS_KEY + timestamp).toString('base64')
-        // create callback url
-        const callback_url = await ngrok.connect(3002);
-        const api = ngrok.getApi();
-        await api.listTunnels();
-        const equityAccNum="squim's e-commerce shop"
+        // Retry logic for ngrok tunnel creation
+        let retryCount = 0;
+        let maxRetries = 3;
+        let ngrokConnected = false;
 
-
-        console.log("callback ",callback_url)
-        request(
-            {
-                url: url,
-                method: "POST",
-                headers: {
-                    "Authorization": auth
-                },
-                json: {
-                    "BusinessShortCode": process.env.BUSINESS_SHORT_CODE,
-                    "Password": password,
-                    "Timestamp": timestamp,
-                    "TransactionType": "CustomerPayBillOnline",
-                    "Amount": amount,
-                    "PartyA": phone,
-                    "PartyB": process.env.BUSINESS_SHORT_CODE,
-                    "PhoneNumber": phone,
-                    "CallBackURL": `${callback_url}/api/stkPushCallback/${Order_ID}`,
-                    "AccountReference": equityAccNum,
-                    "TransactionDesc": "Paid online",
-                }
-            },
-            function (e, response, body) {
-                if (e) {
-                    console.error(e)
-                    res.status(503).json({
-                        message: "Error with the stk push",
-                        error: e.message
-                    });
-                } else {
-                    res.status(200).json(body);
-                }
+        while (!ngrokConnected && retryCount < maxRetries) {
+            try {
+                callback_url = await ngrok.connect({
+                    addr: 3002,
+                    authtoken: process.env.NGROK_AUTH_TOKEN
+                });
+                ngrokConnected = true;
+            } catch (ngrokError) {
+                console.error("Error while trying to start ngrok tunnel:", ngrokError);
+                retryCount++;
+                console.log(`Retrying... Attempt ${retryCount}`);
+                await new Promise(resolve => setTimeout(resolve, 2000)); // Wait for 2 seconds before retrying
             }
-        )
-    }catch (e) {
-        console.error("Error while trying to create LipaNaMpesa details",e)
-        res.status(503).send({
-            message:"Something went wrong while trying to create LipaNaMpesa details. Contact admin",
-            error : e
-        })
+        }
+
+        if (!ngrokConnected) {
+            throw new Error("Failed to start ngrok tunnel after multiple retries.");
+        }
+
+        console.log("callback ", callback_url);
+
+        // Use axios or fetch instead of request
+        const response = await axios.post(url, {
+            BusinessShortCode: process.env.BUSINESS_SHORT_CODE,
+            Password: password,
+            Timestamp: timestamp,
+            TransactionType: "CustomerPayBillOnline",
+            Amount: amount,
+            PartyA: phone,
+            PartyB: process.env.BUSINESS_SHORT_CODE,
+            PhoneNumber: phone,
+            CallBackURL: `${callback_url}/api/stkPushCallback/${Order_ID}`,
+            AccountReference: "squim's e-commerce shop",
+            TransactionDesc: "Paid online"
+        }, {
+            headers: {
+                "Authorization": auth
+            }
+        });
+
+        res.status(200).json(response.data);
+    } catch (e) {
+        console.error("Error while trying to create LipaNaMpesa details", e.message);
+        res.status(503).json({
+            message: "Something went wrong while trying to create LipaNaMpesa details. Contact admin",
+            error: e.message
+        });
     }
-}
+};
 
 // @desc callback route Safaricom will post transaction status
 // @method POST
 // @route /stkPushCallback/:Order_ID
 // @access public
-
-// @desc callback route Safaricom will post transaction status
-// @method POST
-// @route /stkPushCallback/:Order_ID
-// @access public
-export const stkPushCallback = async(req, res) => {
-    try{
-
-    //    order id
+export const stkPushCallback = async (req, res) => {
+    try {
+        //    order id
         //callback details
 
         const {
@@ -87,18 +86,18 @@ export const stkPushCallback = async(req, res) => {
             ResultCode,
             ResultDesc,
             CallbackMetadata
-                 }   = req.body.Body.stkCallback
+        } = req.body.Body.stkCallback;
 
-    //     get the meta data from the meta
-        const meta = Object.values(await CallbackMetadata.Item)
-        const PhoneNumber = meta.find(o => o.Name === 'PhoneNumber').Value.toString()
-        const Amount = meta.find(o => o.Name === 'Amount').Value.toString()
-        const MpesaReceiptNumber = meta.find(o => o.Name === 'MpesaReceiptNumber').Value.toString()
-        const Order_ID = meta.find(o => o.Name === 'Order_ID').Value.toString()
-        const TransactionDate = meta.find(o => o.Name === 'TransactionDate').Value.toString()
+        //     get the meta data from the meta
+        const meta = Object.values(await CallbackMetadata.Item);
+        const PhoneNumber = meta.find(o => o.Name === 'PhoneNumber').Value.toString();
+        const Amount = meta.find(o => o.Name === 'Amount').Value.toString();
+        const MpesaReceiptNumber = meta.find(o => o.Name === 'MpesaReceiptNumber').Value.toString();
+        const Order_ID = meta.find(o => o.Name === 'Order_ID').Value.toString();
+        const TransactionDate = meta.find(o => o.Name === 'TransactionDate').Value.toString();
 
         // do something with the data
-        console.log("-".repeat(20)," OUTPUT IN THE CALLBACK ", "-".repeat(20))
+        console.log("-".repeat(20), " OUTPUT IN THE CALLBACK ", "-".repeat(20));
         console.log(`
             Order_ID : ${Order_ID},
             MerchantRequestID : ${MerchantRequestID},
@@ -109,73 +108,49 @@ export const stkPushCallback = async(req, res) => {
             Amount: ${Amount}, 
             MpesaReceiptNumber: ${MpesaReceiptNumber},
             TransactionDate : ${TransactionDate}
-        `)
+        `);
 
-        res.json(true)
-
-    }catch (e) {
-        console.error("Error while trying to update LipaNaMpesa details from the callback",e)
+        res.json(true);
+    } catch (e) {
+        console.error("Error while trying to update LipaNaMpesa details from the callback", e);
         res.status(503).send({
-            message:"Something went wrong with the callback",
-            error : e.message
-        })
+            message: "Something went wrong with the callback",
+            error: e.message
+        });
     }
-}
-
+};
 
 // @desc Check from safaricom servers the status of a transaction
 // @method GET
 // @route /confirmPayment/:CheckoutRequestID
 // @access public
-// @desc Check from safaricom servers the status of a transaction
-// @method GET
-// @route /confirmPayment/:CheckoutRequestID
-// @access public
-export const confirmPayment = async(req, res) => {
+export const confirmPayment = async (req, res) => {
     console.log('Confirm Payment Function Called');
-    try{
-        const url = "https://sandbox.safaricom.co.ke/mpesa/stkpushquery/v1/query"
-        const auth = "Bearer " + req.safaricom_access_token
+    try {
+        const url = "https://sandbox.safaricom.co.ke/mpesa/stkpushquery/v1/query";
+        const auth = "Bearer " + req.safaricom_access_token;
 
-        const timestamp = getTimestamp()
+        const timestamp = getTimestamp();
         //shortcode + passkey + timestamp
-        const password = new Buffer.from(process.env.BUSINESS_SHORT_CODE + process.env.PASS_KEY + timestamp).toString('base64')
+        const password = new Buffer.from(process.env.BUSINESS_SHORT_CODE + process.env.PASS_KEY + timestamp).toString('base64');
 
-
-        request(
-            {
-                url: url,
-                method: "POST",
-                headers: {
-                    "Authorization": auth
-                },
-                json: {
-                    "BusinessShortCode":process.env.BUSINESS_SHORT_CODE,
-                    "Password": password,
-                    "Timestamp": timestamp,
-                    "CheckoutRequestID": req.params.CheckoutRequestID,
-
-                }
-            },
-            function (error, response, body) {
-                if (error) {
-                    console.log(error)
-                    res.status(503).send({
-                        message:"Something went wrong while trying to create LipaNaMpesa details. Contact admin",
-                        error : error
-                    })
-                } else {
-                    res.status(200).json(body)
-                }
+        const response = await axios.post(url, {
+            BusinessShortCode: process.env.BUSINESS_SHORT_CODE,
+            Password: password,
+            Timestamp: timestamp,
+            CheckoutRequestID: req.params.CheckoutRequestID,
+        }, {
+            headers: {
+                "Authorization": auth
             }
-        )
-    }catch (e) {
-        console.error("Error while trying to create LipaNaMpesa details",e)
+        });
+
+        res.status(200).json(response.data);
+    } catch (e) {
+        console.error("Error while trying to create LipaNaMpesa details", e);
         res.status(503).send({
-            message:"Something went wrong while trying to create LipaNaMpesa details. Contact admin",
-            error : e
-        })
+            message: "Something went wrong while trying to create LipaNaMpesa details. Contact admin",
+            error: e
+        });
     }
-}
-
-
+};
