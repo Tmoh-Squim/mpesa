@@ -7,7 +7,9 @@ const app = express()
 
 // express middleware that convert request body to JSON.
 app.use(express.json())
-app.use(cors())
+app.use(cors([
+    "http://localhost:5500"
+]))
 
 // import routes
 import lipaNaMpesaRoutes from "./routes/routes.lipanampesa.js"

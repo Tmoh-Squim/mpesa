@@ -7,9 +7,10 @@
   "scripts": {
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "start": "nodemon server.js",
-    "build":"npm i"
+    "build": "npm i"
   },
   "dependencies": {
+    "@ngrok/ngrok": "^1.1.1",
     "axios": "^1.4.0",
     "cors": "^2.8.5",
     "dotenv": "^16.0.1",

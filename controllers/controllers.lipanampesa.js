@@ -1,7 +1,7 @@
 import request from "request";
 import 'dotenv/config';
 import { getTimestamp } from "../Utils/utils.timestamp.js";
-import ngrok from 'ngrok';
+import ngrok from '@ngrok/ngrok';
 import axios from "axios"
 // @desc initiate stk push
 // @method POST
@@ -19,16 +19,20 @@ export const initiateSTKPush = async (req, res) => {
 
         // Retry logic for ngrok tunnel creation
         let retryCount = 0;
-        let maxRetries = 3;
+        let maxRetries = 10;
         let ngrokConnected = false;
 
         while (!ngrokConnected && retryCount < maxRetries) {
             try {
-                callback_url = await ngrok.connect({
-                    addr: 3002,
+                 await ngrok.connect({
+                    addr: 8080,
                     authtoken: process.env.NGROK_AUTH_TOKEN
-                });
-                ngrokConnected = true;
+                })
+                .then((listener)=>{
+                    callback_url= `${listener.url()}`;
+                    console.log(`Ingress established at: ${listener.url()}`)
+                })
+                ngrokConnected = true;                
             } catch (ngrokError) {
                 console.error("Error while trying to start ngrok tunnel:", ngrokError);
                 retryCount++;
@@ -147,6 +151,8 @@ export const confirmPayment = async (req, res) => {
         });
 
         res.status(200).json(response.data);
+        console.log(response);
+        
     } catch (e) {
         console.error("Error while trying to create LipaNaMpesa details", e);
         res.status(503).send({
