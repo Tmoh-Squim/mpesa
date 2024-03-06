@@ -14,8 +14,7 @@ app.use(cors([
 // import routes
 import lipaNaMpesaRoutes from "./routes/routes.lipanampesa.js"
 app.use('/api',lipaNaMpesaRoutes)
-import recordRoutes from "./routes/record.js"
-app.use('/api/v1',recordRoutes)
+
 app.get("/",(req,res)=>{
 res.send({
     message:"Server run nicely! ready for stk push request"
