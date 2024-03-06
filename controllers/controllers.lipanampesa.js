@@ -57,7 +57,7 @@ export const initiateSTKPush = async (req, res) => {
             PartyA: phone,
             PartyB: process.env.BUSINESS_SHORT_CODE,
             PhoneNumber: phone,
-            CallBackURL: `${callback_url}`,
+            CallBackURL: `${callback_url}/api/stkPushCallback/${Order_ID}`,
             AccountReference: "squim's e-commerce shop",
             TransactionDesc: "Paid online"
         }, {
@@ -76,24 +76,33 @@ export const initiateSTKPush = async (req, res) => {
     }
 };
 
-export const stkPushCallback = async (req, res) => {
-    try {
+// Function to handle STK push callback
+export const stkPushCallback = async(req, res) => {
+    try{
+
+    //    order id
+        const {Order_ID} = req.params
+
+        console.log(Order_ID);
+        
+
         const {
             MerchantRequestID,
             CheckoutRequestID,
             ResultCode,
             ResultDesc,
             CallbackMetadata
-        } = req.body.Body.stkCallback;
+                 }   = req.body.Body.stkCallback
 
-        const meta = Object.values(await CallbackMetadata.Item);
-        const PhoneNumber = meta.find(o => o.Name === 'PhoneNumber').Value.toString();
-        const Amount = meta.find(o => o.Name === 'Amount').Value.toString();
-        const MpesaReceiptNumber = meta.find(o => o.Name === 'MpesaReceiptNumber').Value.toString();
-        const Order_ID = meta.find(o => o.Name === 'Order_ID').Value.toString();
-        const TransactionDate = meta.find(o => o.Name === 'TransactionDate').Value.toString();
+    //     get the meta data from the meta
+        const meta = Object.values(await CallbackMetadata.Item)
+        const PhoneNumber = meta.find(o => o.Name === 'PhoneNumber').Value.toString()
+        const Amount = meta.find(o => o.Name === 'Amount').Value.toString()
+        const MpesaReceiptNumber = meta.find(o => o.Name === 'MpesaReceiptNumber').Value.toString()
+        const TransactionDate = meta.find(o => o.Name === 'TransactionDate').Value.toString()
 
-        console.log("-".repeat(20), " OUTPUT IN THE CALLBACK ", "-".repeat(20));
+        // do something with the data
+        console.log("-".repeat(20)," OUTPUT IN THE CALLBACK ", "-".repeat(20))
         console.log(`
             Order_ID : ${Order_ID},
             MerchantRequestID : ${MerchantRequestID},
@@ -104,17 +113,18 @@ export const stkPushCallback = async (req, res) => {
             Amount: ${Amount}, 
             MpesaReceiptNumber: ${MpesaReceiptNumber},
             TransactionDate : ${TransactionDate}
-        `);
+        `)
 
-        res.json(true);
-    } catch (e) {
-        console.error("Error while trying to update LipaNaMpesa details from the callback", e);
+        res.json(true)
+
+    }catch (e) {
+        console.error("Error while trying to update LipaNaMpesa details from the callback",e)
         res.status(503).send({
-            message: "Something went wrong with the callback",
-            error: e.message
-        });
+            message:"Something went wrong with the callback",
+            error : e.message
+        })
     }
-};
+}
 
 
 export const confirmPayment = async (req, res) => {
