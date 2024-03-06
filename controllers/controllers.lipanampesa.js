@@ -57,7 +57,7 @@ export const initiateSTKPush = async (req, res) => {
             PartyA: phone,
             PartyB: process.env.BUSINESS_SHORT_CODE,
             PhoneNumber: phone,
-            CallBackURL: `https://stk-push.onrender.com/api/v1/record`,
+            CallBackURL: `${callback_url}`,
             AccountReference: "squim's e-commerce shop",
             TransactionDesc: "Paid online"
         }, {
@@ -76,15 +76,8 @@ export const initiateSTKPush = async (req, res) => {
     }
 };
 
-// @desc callback route Safaricom will post transaction status
-// @method POST
-// @route /stkPushCallback/:Order_ID
-// @access public
 export const stkPushCallback = async (req, res) => {
     try {
-        //    order id
-        //callback details
-
         const {
             MerchantRequestID,
             CheckoutRequestID,
@@ -93,7 +86,6 @@ export const stkPushCallback = async (req, res) => {
             CallbackMetadata
         } = req.body.Body.stkCallback;
 
-        //     get the meta data from the meta
         const meta = Object.values(await CallbackMetadata.Item);
         const PhoneNumber = meta.find(o => o.Name === 'PhoneNumber').Value.toString();
         const Amount = meta.find(o => o.Name === 'Amount').Value.toString();
@@ -101,7 +93,6 @@ export const stkPushCallback = async (req, res) => {
         const Order_ID = meta.find(o => o.Name === 'Order_ID').Value.toString();
         const TransactionDate = meta.find(o => o.Name === 'TransactionDate').Value.toString();
 
-        // do something with the data
         console.log("-".repeat(20), " OUTPUT IN THE CALLBACK ", "-".repeat(20));
         console.log(`
             Order_ID : ${Order_ID},
@@ -125,10 +116,7 @@ export const stkPushCallback = async (req, res) => {
     }
 };
 
-// @desc Check from safaricom servers the status of a transaction
-// @method GET
-// @route /confirmPayment/:CheckoutRequestID
-// @access public
+
 export const confirmPayment = async (req, res) => {
     console.log('Confirm Payment Function Called');
     try {
@@ -149,9 +137,9 @@ export const confirmPayment = async (req, res) => {
                 "Authorization": auth
             }
         });
+        console.log(response.data);
 
         res.status(200).json(response.data);
-        console.log(response);
         
     } catch (e) {
         console.error("Error while trying to create LipaNaMpesa details", e);
