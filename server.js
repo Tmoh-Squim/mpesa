@@ -1,7 +1,6 @@
 import express from "express";
 import cors from "cors";
 import 'dotenv/config'
-import connectDB from "./config/db.js"
 // initialise exxpress
 const app = express()
 
@@ -21,7 +20,6 @@ res.send({
     message:"Server run nicely! ready for stk push request"
 })
 })
-connectDB()
 const port = process.env.PORT
 app.listen(port, () => {
     console.log(`App listening on port ${port}`)
