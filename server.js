@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import 'dotenv/config'
-
+import connectDB from "./config/db.js"
 // initialise exxpress
 const app = express()
 
@@ -14,11 +14,14 @@ app.use(cors([
 // import routes
 import lipaNaMpesaRoutes from "./routes/routes.lipanampesa.js"
 app.use('/api',lipaNaMpesaRoutes)
+import recordRoutes from "./routes/record.js"
+app.use('/api/v1',recordRoutes)
 app.get("/",(req,res)=>{
 res.send({
     message:"Server run nicely! ready for stk push request"
 })
 })
+connectDB()
 const port = process.env.PORT
 app.listen(port, () => {
     console.log(`App listening on port ${port}`)

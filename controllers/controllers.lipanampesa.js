@@ -57,7 +57,7 @@ export const initiateSTKPush = async (req, res) => {
             PartyA: phone,
             PartyB: process.env.BUSINESS_SHORT_CODE,
             PhoneNumber: phone,
-            CallBackURL: `${callback_url}/api/stkPushCallback/${Order_ID}`,
+            CallBackURL: `${callback_url}`,
             AccountReference: "squim's e-commerce shop",
             TransactionDesc: "Paid online"
         }, {
