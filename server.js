@@ -13,8 +13,8 @@ app.use(cors([
 //configure database
 connectDB()
 // import routes
-//import lipaNaMpesaRoutes from "./routes/routes.lipanampesa.js"
-//app.use('/api',lipaNaMpesaRoutes)
+import lipaNaMpesaRoutes from "./routes/routes.lipanampesa.js"
+app.use('/api',lipaNaMpesaRoutes)
 app.get("/",(req,res)=>{
 res.send({
     message:"Server run nicely! ready for stk push request"
