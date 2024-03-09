@@ -23,11 +23,14 @@
   "devDependencies": {
     "nodemon": "^2.0.16"
   },
+  "engines": {
+    "node": ">=18.18.0 <19.0.0"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/wamaithaNyamu/Lipa-na-Mpesa-STK-Push-.git"
   },
-  "author": "Wamaitha Nyamu",
+  "author": "Timothy Squim",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/wamaithaNyamu/Lipa-na-Mpesa-STK-Push-/issues"
