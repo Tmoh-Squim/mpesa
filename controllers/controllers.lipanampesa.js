@@ -3,13 +3,10 @@ import 'dotenv/config';
 import { getTimestamp } from "../Utils/utils.timestamp.js";
 import ngrok from '@ngrok/ngrok';
 import axios from "axios"
-// @desc initiate stk push
-// @method POST
-//completed
-// @route /stkPush
+import StkModel from "../model/record.js"
+
 export const initiateSTKPush = async (req, res) => {
     try {
-        console.log("Request body", req.body);
         const { amount, phone, Order_ID } = req.body;
         const url = "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest";
         const auth = "Bearer " + req.safaricom_access_token;
@@ -17,9 +14,8 @@ export const initiateSTKPush = async (req, res) => {
         const password = new Buffer.from(process.env.BUSINESS_SHORT_CODE + process.env.PASS_KEY + timestamp).toString('base64');
         let callback_url;
 
-        // Retry logic for ngrok tunnel creation
         let retryCount = 0;
-        let maxRetries = 10;
+        let maxRetries = 5;
         let ngrokConnected = false;
 
         while (!ngrokConnected && retryCount < maxRetries) {
@@ -44,9 +40,6 @@ export const initiateSTKPush = async (req, res) => {
         if (!ngrokConnected) {
             throw new Error("Failed to start ngrok tunnel after multiple retries.");
         }
-
-        console.log("callback ", callback_url);
-
         // Use axios or fetch instead of request
         const response = await axios.post(url, {
             BusinessShortCode: process.env.BUSINESS_SHORT_CODE,
@@ -57,7 +50,7 @@ export const initiateSTKPush = async (req, res) => {
             PartyA: phone,
             PartyB: process.env.BUSINESS_SHORT_CODE,
             PhoneNumber: phone,
-            CallBackURL: `${callback_url}/api/stkPushCallback/${Order_ID}`,
+            CallBackURL: `https://stk-push.onrender.com/api/stkPushCallback/${Order_ID}`,
             AccountReference: "squim's e-commerce shop",
             TransactionDesc: "Paid online"
         }, {
@@ -77,9 +70,8 @@ export const initiateSTKPush = async (req, res) => {
 };
 
 // Function to handle STK push callback
-export const stkPushCallback = async(req, res) => {
+export const stkPushCallback = async(req, res) => {    
     try{
-
     //    order id
         const {Order_ID} = req.params
 
@@ -114,11 +106,22 @@ export const stkPushCallback = async(req, res) => {
             MpesaReceiptNumber: ${MpesaReceiptNumber},
             TransactionDate : ${TransactionDate}
         `)
+        const newRecord={
+            Amount:Amount,
+            MpesaReceiptNumber:MpesaReceiptNumber,
+            Phone:PhoneNumber,
+            Order_ID:Order_ID,
+            CheckoutRequestID:CheckoutRequestID
+        }
+        const record = await StkModel.create(newRecord)
+        
 
-        res.json(true)
+        res.json({
+            success:true,
+            record
+        })
 
     }catch (e) {
-        console.error("Error while trying to update LipaNaMpesa details from the callback",e)
         res.status(503).send({
             message:"Something went wrong with the callback",
             error : e.message
@@ -128,7 +131,6 @@ export const stkPushCallback = async(req, res) => {
 
 
 export const confirmPayment = async (req, res) => {
-    console.log('Confirm Payment Function Called');
     try {
         const url = "https://sandbox.safaricom.co.ke/mpesa/stkpushquery/v1/query";
         const auth = "Bearer " + req.safaricom_access_token;

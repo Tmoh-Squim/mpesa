@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import 'dotenv/config'
+import connectDB from "./config/db.js"
 // initialise exxpress
 const app = express()
 
@@ -9,7 +10,8 @@ app.use(express.json())
 app.use(cors([
     "http://localhost:5500"
 ]))
-
+//configure database
+connectDB()
 // import routes
 import lipaNaMpesaRoutes from "./routes/routes.lipanampesa.js"
 app.use('/api',lipaNaMpesaRoutes)
