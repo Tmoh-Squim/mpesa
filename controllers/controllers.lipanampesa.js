@@ -50,7 +50,7 @@ export const initiateSTKPush = async (req, res) => {
             PartyA: phone,
             PartyB: process.env.BUSINESS_SHORT_CODE,
             PhoneNumber: phone,
-            CallBackURL: `https://stk-push.onrender.com/api/stkPushCallback/${Order_ID}`,
+            CallBackURL: `https://stk-push.onrender.com/api/stkPushCallback`,
             AccountReference: "squim's e-commerce shop",
             TransactionDesc: "Paid online"
         }, {
@@ -73,10 +73,7 @@ export const initiateSTKPush = async (req, res) => {
 export const stkPushCallback = async(req, res) => {    
     try{
     //    order id
-        const {Order_ID} = req.params
-
-        console.log(Order_ID);
-        
+       
 
         const {
             MerchantRequestID,
@@ -96,7 +93,7 @@ export const stkPushCallback = async(req, res) => {
         // do something with the data
         console.log("-".repeat(20)," OUTPUT IN THE CALLBACK ", "-".repeat(20))
         console.log(`
-            Order_ID : ${Order_ID},
+            
             MerchantRequestID : ${MerchantRequestID},
             CheckoutRequestID: ${CheckoutRequestID},
             ResultCode: ${ResultCode},
@@ -110,7 +107,7 @@ export const stkPushCallback = async(req, res) => {
             Amount:Amount,
             MpesaReceiptNumber:MpesaReceiptNumber,
             Phone:PhoneNumber,
-            Order_ID:Order_ID,
+            
             CheckoutRequestID:CheckoutRequestID
         }
         const record = await StkModel.create(newRecord)
