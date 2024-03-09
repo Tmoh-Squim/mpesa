@@ -50,7 +50,7 @@ export const initiateSTKPush = async (req, res) => {
             PartyA: phone,
             PartyB: process.env.BUSINESS_SHORT_CODE,
             PhoneNumber: phone,
-            CallBackURL: `https://stk-ajuy.onrender.com/api/record`,
+            CallBackURL: `https://stk-push.onrender.com/api/stkPushCallback/${Order_ID}`,
             AccountReference: "squim's e-commerce shop",
             TransactionDesc: "Paid online"
         }, {

@@ -4,7 +4,6 @@ const recordSchema= mongoose.Schema({
     Phone:{
         type:String,
         required:true
-
     },
     Amount:{
         type:String,
