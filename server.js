@@ -2,7 +2,6 @@ import express from "express";
 import cors from "cors";
 import 'dotenv/config'
 import connectDB from "./config/db.js"
-// initialise exxpress
 const app = express()
 
 // express middleware that convert request body to JSON.
