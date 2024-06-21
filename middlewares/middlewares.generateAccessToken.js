@@ -1,40 +1,42 @@
 import axios from 'axios';
 import 'dotenv/config';
 
-export const accessToken = async (req, res, next) => {
-    try {
-        const url = "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials";
-        const auth = Buffer.from(`${process.env.SAFARICOM_CONSUMER_KEY}:${process.env.SAFARICOM_CONSUMER_SECRET}`).toString('base64');
+const getAccessToken = async () => {
+    const url = "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials";
+    const auth = Buffer.from(`${process.env.SAFARICOM_CONSUMER_KEY}:${process.env.SAFARICOM_CONSUMER_SECRET}`).toString('base64');
 
+    try {
         const response = await axios.get(url, {
             headers: {
-                "Authorization": "Basic " + auth
+                "Authorization": "Basic " + auth,
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
             }
         });
+        return response.data.access_token;
+    } catch (error) {
+        if (error.response && error.response.status === 503) {
+            console.log("Service unavailable, retrying...");
+            await new Promise(resolve => setTimeout(resolve, 5000));
+            return getAccessToken();
+        } else {
+            throw error;
+        }
+    }
+};
 
-        if (response.data && response.data.access_token) {
-            req.safaricom_access_token = response.data.access_token;
+export const accessToken = async (req, res, next) => {
+    try {
+        const token = await getAccessToken();
+        if (token) {
+            req.safaricom_access_token = token;
             next();
         } else {
             res.status(401).send({
-                "message": 'Failed to retrieve access token',
-                "error": response.data
+                "message": 'Failed to retrieve access token'
             });
         }
     } catch (error) {
-        if (error.response) {
-            // Server responded with a status other than 200 range
-            console.error("Error response data:", error.response.data);
-            console.error("Error response status:", error.response.status);
-            console.error("Error response headers:", error.response.headers);
-        } else if (error.request) {
-            // Request was made but no response received
-            console.error("Error request data:", error.request);
-        } else {
-            // Something else happened while setting up the request
-            console.error("Error message:", error.message);
-        }
-
+        console.error("Access token error ", error);
         res.status(401).send({
             "message": 'Something went wrong when trying to process your payment',
             "error": error.message
