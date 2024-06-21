@@ -7,7 +7,8 @@ import connectDB from "./config/db.js"
 app.use(express.json())
 app.use(cors([
     "http://localhost:5500",
-    "http://localhost:3000"
+    "http://localhost:3000",
+    "https://kenchick.vercel.app",
 ]))
 //configure database
 connectDB()
