@@ -6,7 +6,8 @@ import connectDB from "./config/db.js"
 // express middleware that convert request body to JSON.
 app.use(express.json())
 app.use(cors([
-    "http://localhost:5500"
+    "http://localhost:5500",
+    "http://localhost:3000"
 ]))
 //configure database
 connectDB()
