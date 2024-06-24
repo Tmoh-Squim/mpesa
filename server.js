@@ -9,6 +9,7 @@ app.use(cors([
     "http://localhost:5500",
     "http://localhost:3000",
     "https://kenchick.vercel.app",
+    "https://squimstech.vercel.app",
 ]))
 //configure database
 connectDB()
