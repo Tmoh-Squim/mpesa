@@ -81,6 +81,7 @@ export const stkPushCallback = async (req, res) => {
         } = req.body.Body.stkCallback;
 
         const meta = Object.values(await CallbackMetadata.Item);
+        console.log("meta-data",meta);
         const PhoneNumber = meta.find(o => o.Name === 'PhoneNumber').Value.toString();
         const Amount = meta.find(o => o.Name === 'Amount').Value.toString();
         const MpesaReceiptNumber = meta.find(o => o.Name === 'MpesaReceiptNumber').Value.toString();
